@@ -1,0 +1,2 @@
+Search engines support Boolean queries.
+An inverted index improves search.

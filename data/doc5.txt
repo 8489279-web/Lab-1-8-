@@ -1,0 +1,2 @@
+Python supports data structures.
+Memory optimization improves performance.

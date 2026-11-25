@@ -1,0 +1,2 @@
+Hash tables store keys and values.
+Dictionaries use hash tables.
