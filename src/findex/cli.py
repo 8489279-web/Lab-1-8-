@@ -1,4 +1,4 @@
-﻿import json
+import json
 import logging
 import pickle
 from pathlib import Path
@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.progress import Progress
 from rich.table import Table
 
-from findex.index import build_index
+from findex.index import ExecutorName, build_index
 from findex.ranking import search as ranked_search
 from findex.scoring import ScorerName, get_scorer
 from findex.store import load, save
@@ -53,6 +53,14 @@ def index_command(
         Path,
         typer.Option("--out", "-o"),
     ] = Path("index.bin"),
+    workers: Annotated[
+        int,
+        typer.Option("--workers", min=1),
+    ] = 1,
+    executor: Annotated[
+        ExecutorName,
+        typer.Option("--executor"),
+    ] = "serial",
 ) -> None:
     if not directory.is_dir():
         fail(f"Directory not found: {directory}")
@@ -67,12 +75,16 @@ def index_command(
             index = build_index(
                 directory,
                 with_positions=True,
+                workers=workers,
+                executor=executor,
             )
 
             save(index, out)
 
             progress.update(task, total=1, completed=1)
 
+        console.print(f"Executor: {executor}")
+        console.print(f"Requested workers: {workers}")
         console.print(f"Documents: {index.num_docs}")
         console.print(f"Terms: {len(index)}")
         console.print(f"Index saved: {out}")
