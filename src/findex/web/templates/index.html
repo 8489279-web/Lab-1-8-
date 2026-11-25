@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Findex Search</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <main class="container">
+        <h1>Findex Search</h1>
+
+        <form action="/" method="get" class="search-form">
+            <input type="search" name="q" value="{{ q }}"
+                   placeholder="Enter your search query" required>
+            <button type="submit">Search</button>
+        </form>
+
+        {% if result %}
+            <p class="summary">
+                Found {{ result.total }} documents
+                in {{ "%.3f"|format(result.took_ms) }} ms
+            </p>
+
+            {% for item in result.results %}
+                <article class="result">
+                    <h2>
+                        <a href="/doc/{{ item.doc_id }}">
+                            {{ item.title }}
+                        </a>
+                    </h2>
+
+                    <span class="score">
+                        Score: {{ "%.4f"|format(item.score) }}
+                    </span>
+
+                    <p>
+                        {% for part in item.snippet.split('[') %}
+                            {% if loop.first %}
+                                {{ part }}
+                            {% else %}
+                                {% set pieces = part.split(']', 1) %}
+                                <mark>{{ pieces[0] }}</mark>{{ pieces[1] if pieces|length > 1 else '' }}
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+                </article>
+            {% endfor %}
+
+            <nav class="pagination">
+                {% if page > 1 %}
+                    <a href="/?q={{ q|urlencode }}&page={{ page - 1 }}">
+                        Previous
+                    </a>
+                {% endif %}
+
+                <span>Page {{ page }}</span>
+
+                {% if page * 10 < result.total %}
+                    <a href="/?q={{ q|urlencode }}&page={{ page + 1 }}">
+                        Next
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </main>
+</body>
+</html>

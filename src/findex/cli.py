@@ -240,5 +240,30 @@ def stats_command(
         fail(str(error))
 
 
+@app.command("serve")
+def serve_command(
+    port: Annotated[
+        int | None,
+        typer.Option("--port", min=1, max=65535),
+    ] = None,
+    workers: Annotated[
+        int,
+        typer.Option("--workers", min=1),
+    ] = 1,
+) -> None:
+    import uvicorn
+
+    from findex.web.settings import Settings
+
+    settings = Settings()
+    uvicorn.run(
+        "findex.web:app",
+        host="0.0.0.0",
+        port=settings.port if port is None else port,
+        workers=workers,
+        log_level=settings.log_level.lower(),
+    )
+
+
 if __name__ == "__main__":
     app()
