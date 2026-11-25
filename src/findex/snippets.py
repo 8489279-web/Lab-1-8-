@@ -1,12 +1,12 @@
-
 import re
 from pathlib import Path
 
+from findex.index import Index
 from findex.query import parse
 from findex.ranking import positive_terms
 
 
-def make_snippet(index, doc_id, query, radius=80):
+def make_snippet(index: Index, doc_id: int, query: str, radius: int = 80) -> str:
     path = Path(index.doc_meta[doc_id].path)
     text = path.read_text(encoding="utf-8-sig")
 

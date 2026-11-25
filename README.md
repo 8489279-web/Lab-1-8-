@@ -168,3 +168,87 @@
     Evaluation:
 
         python evaluation.py
+
+### Висновок
+
+ У ході лабораторної роботи реалізовано ранжування документів за алгоритмами TF-IDF та BM25, логічні запити, пошук точних фраз, кешування та формування текстових фрагментів. проведено оцінювання точності пошуку за метрикою Precision@5. бидва алгоритми показали результат 0.14 на використаній розмітці корпусу.
+
+
+---
+
+## Laboratory work 4
+
+### CI status
+
+[![CI](https://github.com/8489279-web/Lab2/actions/workflows/ci.yml/badge.svg)](https://github.com/8489279-web/Lab2/actions/workflows/ci.yml)
+
+### Installation
+
+    uv sync
+    uv tool install .
+
+### CLI commands
+
+    findex --help
+    findex index data --out index.bin
+    findex search "python" --scorer bm25 --k 5
+    findex search "python" --scorer tfidf --k 5
+    findex search "python" --json
+    findex stats
+    findex -v search "python"
+    findex -vv search "python"
+
+### Code quality
+
+    uv run ruff check .
+    uv run pyright
+    uv run pytest -q
+
+Results:
+
+- Ruff: all checks passed.
+- Pyright: 0 errors, 0 warnings.
+- Pytest: 118 passed.
+- Hypothesis: 3 property-based tests.
+- Code coverage: 68%.
+
+### Test coverage
+
+    uv run pytest --cov=findex --cov-report=term-missing
+
+| Module | Coverage |
+|---|---:|
+| benchmark.py | 0% |
+| cache.py | 44% |
+| cli.py | 94% |
+| corpus.py | 83% |
+| index.py | 70% |
+| query.py | 95% |
+| ranking.py | 46% |
+| scoring.py | 91% |
+| search.py | 83% |
+| snippets.py | 0% |
+| store.py | 74% |
+| utils.py | 100% |
+| Total | 68% |
+
+Benchmark scripts and legacy demonstration entry points
+were not specifically targeted by automated tests.
+Snippet generation remains untested.
+Some cache and ranking branches also remain uncovered.
+
+### Slow tests
+
+    uv run pytest -m "not slow" -q
+    uv run pytest -m slow -q
+
+- Fast tests: 116.
+- Slow tests: 2.
+
+### Conclusion
+
+The Findex project was extended with strict type checking,
+automated testing, property-based testing, package metadata,
+a command-line interface, structured logging and CI configuration.
+All 118 automated tests passed, and code coverage reached 68%.
+

@@ -1,12 +1,16 @@
+
 import re
+from collections.abc import Iterator
 from pathlib import Path
 
 
-def tokenize(text):
+def tokenize(text: str) -> list[str]:
     return re.findall(r"\b\w+\b", text.lower())
 
 
-def stream_corpus(directory):
+def stream_corpus(
+    directory: str | Path,
+) -> Iterator[tuple[int, Path, list[str]]]:
     for doc_id, path in enumerate(
         sorted(Path(directory).rglob("*.txt")), start=1
     ):

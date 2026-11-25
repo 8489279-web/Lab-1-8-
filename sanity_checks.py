@@ -1,7 +1,7 @@
 
-from findex.store import load
-from findex.index import Index, Posting
+from findex.index import Posting
 from findex.scoring import BM25, TfIdf
+from findex.store import load
 
 index = load("index.bin")
 bm25 = BM25()

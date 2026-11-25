@@ -1,15 +1,19 @@
-
+﻿
 from collections import defaultdict
 from heapq import nlargest
 
-from findex.corpus import tokenize
-from findex.scoring import BM25, TfIdf, SearchResult
-from findex.query import parse, Term, Phrase, And, Or, Not
 from findex.cache import QueryCache
+from findex.corpus import tokenize
+from findex.index import Index
+from findex.query import And, Not, Or, Phrase, Query, Term, parse
+from findex.scoring import BM25, Scorer, SearchResult, TfIdf
 from findex.utils import timed
 
 
-def positive_terms(node, negated=False):
+def positive_terms(
+    node: Query,
+    negated: bool = False,
+) -> list[str]:
     if isinstance(node, Term):
         return [] if negated else [node.value]
 
@@ -29,7 +33,16 @@ def positive_terms(node, negated=False):
 
 
 @timed
-def search(index, query, scorer=BM25(), k=10, cache=None):
+def search(
+    index: Index,
+    query: str,
+    scorer: Scorer | None = None,
+    k: int = 10,
+    cache: QueryCache | None = None,
+) -> list[SearchResult]:
+    if scorer is None:
+        scorer = BM25()
+
     if not query.strip():
         return []
 
@@ -40,7 +53,7 @@ def search(index, query, scorer=BM25(), k=10, cache=None):
     else:
         candidates = tree.evaluate(index)
 
-    scores = defaultdict(float)
+    scores: dict[int, float] = defaultdict(float)
 
     for doc_id in sorted(candidates):
         scores[doc_id] = 0.0
@@ -56,7 +69,7 @@ def search(index, query, scorer=BM25(), k=10, cache=None):
         SearchResult(
             doc_id=doc_id,
             score=score,
-            title=index.doc_meta[doc_id].title
+            title=index.doc_meta[doc_id].title,
         )
         for doc_id, score in scores.items()
     )
@@ -64,10 +77,14 @@ def search(index, query, scorer=BM25(), k=10, cache=None):
     return nlargest(k, results)
 
 
-if __name__ == "__main__":
+def main() -> None:
     import argparse
-    from findex.store import open_index
+    import logging
+
     from findex.snippets import make_snippet
+    from findex.store import open_index
+
+    logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("query")
@@ -75,13 +92,15 @@ if __name__ == "__main__":
     parser.add_argument(
         "--scorer",
         choices=["tfidf", "bm25"],
-        default="bm25"
+        default="bm25",
     )
     parser.add_argument("--k", type=int, default=10)
     parser.add_argument("--repeat", type=int, default=1)
     args = parser.parse_args()
 
-    scorer = BM25() if args.scorer == "bm25" else TfIdf()
+    scorer: Scorer = (
+        BM25() if args.scorer == "bm25" else TfIdf()
+    )
 
     with open_index(args.index) as index:
         cache = QueryCache(index)
@@ -106,8 +125,12 @@ if __name__ == "__main__":
                     "Snippet:",
                     make_snippet(
                         index, result.doc_id, args.query
-                    )
+                    ),
                 )
 
         print("\nCache statistics:")
         print(cache.cache_info())
+
+
+if __name__ == "__main__":
+    main()

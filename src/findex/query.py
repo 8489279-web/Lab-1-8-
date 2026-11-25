@@ -1,20 +1,24 @@
 
+from __future__ import annotations
+
 import re
 from dataclasses import dataclass
+
 from findex.corpus import tokenize
+from findex.index import Index
 
 
 class Query:
-    def __and__(self, other):
+    def __and__(self, other: Query) -> And:
         return And(self, other)
 
-    def __or__(self, other):
+    def __or__(self, other: Query) -> Or:
         return Or(self, other)
 
-    def __invert__(self):
+    def __invert__(self) -> Not:
         return Not(self)
 
-    def evaluate(self, index):
+    def evaluate(self, index: Index) -> set[int]:
         raise NotImplementedError
 
 
@@ -22,7 +26,7 @@ class Query:
 class Term(Query):
     value: str
 
-    def evaluate(self, index):
+    def evaluate(self, index: Index) -> set[int]:
         return {
             p.doc_id
             for p in index.postings.get(self.value, [])
@@ -33,7 +37,7 @@ class Term(Query):
 class Phrase(Query):
     value: str
 
-    def evaluate(self, index):
+    def evaluate(self, index: Index) -> set[int]:
         words = tokenize(self.value)
 
         if not words:
@@ -52,7 +56,7 @@ class Phrase(Query):
         for items in postings[1:]:
             candidates &= set(items)
 
-        results = set()
+        results: set[int] = set()
 
         for doc_id in candidates:
             positions = [
@@ -76,7 +80,7 @@ class And(Query):
     left: Query
     right: Query
 
-    def evaluate(self, index):
+    def evaluate(self, index: Index) -> set[int]:
         return (
             self.left.evaluate(index)
             & self.right.evaluate(index)
@@ -88,7 +92,7 @@ class Or(Query):
     left: Query
     right: Query
 
-    def evaluate(self, index):
+    def evaluate(self, index: Index) -> set[int]:
         return (
             self.left.evaluate(index)
             | self.right.evaluate(index)
@@ -99,7 +103,7 @@ class Or(Query):
 class Not(Query):
     operand: Query
 
-    def evaluate(self, index):
+    def evaluate(self, index: Index) -> set[int]:
         return (
             set(index.doc_meta)
             - self.operand.evaluate(index)
@@ -107,27 +111,29 @@ class Not(Query):
 
 
 class Parser:
-    def __init__(self, query):
-        self.tokens = re.findall(
-            r'"[^"]*"|\(|\)|[^\s()"]+| uniqueNeverMatch',
-            query
+    def __init__(self, query: str) -> None:
+        self.tokens: list[str] = re.findall(
+            r'"[^"]*"|\(|\)|[^\s()"]+',
+            query,
         )
+
         if query.count('"') % 2:
             raise ValueError("Unclosed quotation mark")
 
         self.position = 0
 
-    def peek(self):
+    def peek(self) -> str | None:
         if self.position < len(self.tokens):
             return self.tokens[self.position]
+
         return None
 
-    def consume(self):
+    def consume(self) -> str | None:
         token = self.peek()
         self.position += 1
         return token
 
-    def parse(self):
+    def parse(self) -> Query:
         result = self.parse_or()
 
         if self.peek() is not None:
@@ -135,7 +141,7 @@ class Parser:
 
         return result
 
-    def parse_or(self):
+    def parse_or(self) -> Query:
         left = self.parse_and()
 
         while self.peek() == "OR":
@@ -144,7 +150,7 @@ class Parser:
 
         return left
 
-    def parse_and(self):
+    def parse_and(self) -> Query:
         left = self.parse_not()
 
         while self.peek() not in (None, "OR", ")"):
@@ -155,14 +161,14 @@ class Parser:
 
         return left
 
-    def parse_not(self):
+    def parse_not(self) -> Query:
         if self.peek() == "NOT":
             self.consume()
             return Not(self.parse_not())
 
         return self.parse_atom()
 
-    def parse_atom(self):
+    def parse_atom(self) -> Query:
         token = self.consume()
 
         if token is None:
@@ -185,5 +191,5 @@ class Parser:
         return Term(token.lower())
 
 
-def parse(query):
+def parse(query: str) -> Query:
     return Parser(query).parse()

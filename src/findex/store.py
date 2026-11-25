@@ -1,16 +1,35 @@
+﻿
+import json
+import pickle
+from collections.abc import Generator
+from contextlib import contextmanager
+from dataclasses import asdict
+from pathlib import Path
+from time import perf_counter
+from typing import TypedDict, cast
+
+from findex.index import DocMeta, Index, Posting, build_index
 from findex.utils import timed
 
-import pickle
-import json
-from pathlib import Path
-from dataclasses import asdict
-from time import perf_counter
-from contextlib import contextmanager
 
-from findex.index import Index, Posting, DocMeta, build_index
+class PostingData(TypedDict):
+    doc_id: int
+    tf: int
+    positions: list[int]
 
 
-def save(index, path):
+class DocMetaData(TypedDict):
+    path: str
+    title: str
+
+
+class IndexData(TypedDict):
+    postings: dict[str, list[PostingData]]
+    doc_lengths: dict[str, int]
+    doc_meta: dict[str, DocMetaData]
+
+
+def save(index: Index, path: str | Path) -> None:
     path = Path(path)
 
     if path.suffix == ".json":
@@ -23,7 +42,7 @@ def save(index, path):
             "doc_meta": {
                 doc_id: asdict(meta)
                 for doc_id, meta in index.doc_meta.items()
-            }
+            },
         }
 
         with path.open("w", encoding="utf-8") as f:
@@ -35,12 +54,12 @@ def save(index, path):
 
 
 @timed
-def load(path):
+def load(path: str | Path) -> Index:
     path = Path(path)
 
     if path.suffix == ".json":
         with path.open("r", encoding="utf-8") as f:
-            data = json.load(f)
+            data = cast(IndexData, json.load(f))
 
         return Index(
             postings={
@@ -48,7 +67,7 @@ def load(path):
                     Posting(
                         doc_id=p["doc_id"],
                         tf=p["tf"],
-                        positions=tuple(p.get("positions", []))
+                        positions=tuple(p.get("positions", [])),
                     )
                     for p in items
                 ]
@@ -61,25 +80,30 @@ def load(path):
             doc_meta={
                 int(k): DocMeta(**v)
                 for k, v in data["doc_meta"].items()
-            }
+            },
         )
 
-    # Never load untrusted pickle files:
-    # they can execute arbitrary code.
+    # Never load untrusted pickle files.
     with path.open("rb") as f:
-        return pickle.load(f)
+        result: object = pickle.load(f)
+
+    if not isinstance(result, Index):
+        raise TypeError("Invalid index file")
+
+    return result
 
 
 @contextmanager
-def open_index(path):
+def open_index(path: str | Path) -> Generator[Index, None, None]:
     index = load(path)
+
     try:
         yield index
     finally:
         del index
 
 
-if __name__ == "__main__":
+def main() -> None:
     index = build_index("data", with_positions=True)
 
     for filename in ("index.bin", "index.json"):
@@ -98,3 +122,7 @@ if __name__ == "__main__":
         print(f"Documents: {len(loaded.doc_meta)}")
         print(f"Unique terms: {len(loaded.postings)}")
         print(f"Verification: {index == loaded}")
+
+
+if __name__ == "__main__":
+    main()

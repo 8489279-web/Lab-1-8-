@@ -1,8 +1,7 @@
 
-from findex.store import open_index
 from findex.ranking import search
-from findex.scoring import TfIdf, BM25
-
+from findex.scoring import BM25, TfIdf
+from findex.store import open_index
 
 queries = [
     ("programming language", {"doc1"}),
