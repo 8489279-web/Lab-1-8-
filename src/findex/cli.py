@@ -3,6 +3,7 @@ import logging
 import pickle
 from pathlib import Path
 from typing import Annotated
+from findex.semantic import build_semantic_index
 
 import typer
 from rich.console import Console
@@ -264,6 +265,23 @@ def serve_command(
         log_level=settings.log_level.lower(),
     )
 
+@app.command("embed")
+def embed_command(
+    corpus: Path = Path("data"),
+    model: str = "all-MiniLM-L6-v2",
+    output: Path = Path("docs/semantic"),
+) -> None:
+    try:
+        build_semantic_index(
+            corpus_dir=corpus,
+            output_dir=output,
+            model_name=model,
+        )
+
+        console.print("Semantic index saved:", output)
+
+    except (OSError, ValueError, TypeError) as error:
+        fail(str(error))
 
 if __name__ == "__main__":
     app()
