@@ -1,8 +1,11 @@
+from findex.utils import timed
+
 import pickle
 import json
 from pathlib import Path
 from dataclasses import asdict
 from time import perf_counter
+from contextlib import contextmanager
 
 from findex.index import Index, Posting, DocMeta, build_index
 
@@ -31,6 +34,7 @@ def save(index, path):
             pickle.dump(index, f)
 
 
+@timed
 def load(path):
     path = Path(path)
 
@@ -40,7 +44,14 @@ def load(path):
 
         return Index(
             postings={
-                term: [Posting(**p) for p in items]
+                term: [
+                    Posting(
+                        doc_id=p["doc_id"],
+                        tf=p["tf"],
+                        positions=tuple(p.get("positions", []))
+                    )
+                    for p in items
+                ]
                 for term, items in data["postings"].items()
             },
             doc_lengths={
@@ -59,8 +70,17 @@ def load(path):
         return pickle.load(f)
 
 
+@contextmanager
+def open_index(path):
+    index = load(path)
+    try:
+        yield index
+    finally:
+        del index
+
+
 if __name__ == "__main__":
-    index = build_index("data")
+    index = build_index("data", with_positions=True)
 
     for filename in ("index.bin", "index.json"):
         start = perf_counter()
