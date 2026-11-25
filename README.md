@@ -1,222 +1,235 @@
-    # Lab 02 — Data Structures and the Inverted Index
 
-    ## Опис проєкту
+# Лабораторна робота №2 — Структури даних та інвертований індекс
 
-    Розроблено пошукову систему на основі інвертованого індексу.
-    Для тестування використано корпус із 300 документів,
-    який містить 34 унікальні терміни.
+## Опис проєкту
 
-    ## Структура проєкту
+Розроблено пошукову систему на основі інвертованого індексу.
+Для тестування використано корпус із 300 документів, який містить 34 унікальні терміни.
 
-    - corpus.py — читання та токенізація документів.
-    - index.py — побудова інвертованого індексу.
-    - search.py — пошук документів.
-    - store.py — збереження та завантаження індексу.
-    - benchmark.py — порівняння продуктивності.
-    - data/ — корпус текстових документів.
+## Структура проєкту
 
-    ## Запуск програми
+- corpus.py — читання та токенізація документів.
+- index.py — побудова інвертованого індексу.
+- search.py — пошук документів.
+- store.py — збереження та завантаження індексу.
+- benchmark.py — порівняння продуктивності.
+- data/ — корпус текстових документів.
 
-    Побудова індексу:
+## Запуск програми
 
-        python -m findex.index data --out index.bin
+Побудова індексу:
 
-    Пошук алгоритмом merge:
+    python -m findex.index data --out index.bin
 
-        python -m findex.search index.bin "is OR a" --engine merge
+Пошук алгоритмом merge:
 
-    Пошук алгоритмом set:
+    python -m findex.search index.bin "is OR a" --engine merge
 
-        python -m findex.search index.bin "is OR a" --engine set
+Пошук алгоритмом set:
 
-    ## Порівняння алгоритмів пошуку
+    python -m findex.search index.bin "is OR a" --engine set
 
-    Кожен запит виконано 1000 разів.
+## Порівняння алгоритмів пошуку
 
-    | Запит | Merge, мс | Set, мс |
-    |---|---:|---:|
-    | search AND python | 110.378 | 60.178 |
-    | is AND a | 8.256 | 10.595 |
-    | search OR python | 120.803 | 55.983 |
-    | is OR a | 8.414 | 9.162 |
+Кожен запит виконано 1000 разів.
 
-    На використаному корпусі алгоритм set показав кращі
-    результати для поширених термінів, а merge — для рідкісних.
+| Запит | Merge, мс | Set, мс |
+|---|---:|---:|
+| search AND python | 110.378 | 60.178 |
+| is AND a | 8.256 | 10.595 |
+| search OR python | 120.803 | 55.983 |
+| is OR a | 8.414 | 9.162 |
 
-    ## Порівняння структур даних
+На використаному корпусі алгоритм set показав кращі результати для поширених термінів, а merge — для рідкісних.
 
-    | Структура | Пікова пам'ять, байт | Розмір файлу, байт | Завантаження, мс |
-    |---|---:|---:|---:|
-    | Plain dataclass | 706495 | 86992 | 17.665 |
-    | Slotted dataclass | 473338 | 67921 | 24.489 |
-    | array('I') | 249371 | 39094 | 13.734 |
+## Порівняння структур даних
 
-    Вимірювання проведено для списків входжень без метаданих.
+| Структура | Пікова пам'ять, байт | Розмір файлу, байт | Завантаження, мс |
+|---|---:|---:|---:|
+| Plain dataclass | 706495 | 86992 | 17.665 |
+| Slotted dataclass | 473338 | 67921 | 24.489 |
+| array('I') | 249371 | 39094 | 13.734 |
 
-    Slotted dataclass зменшує витрати пам'яті завдяки
-    відсутності словника атрибутів екземпляра.
+Вимірювання проведено для списків входжень без метаданих.
 
-    Масив array('I') зберігає цілі числа компактніше,
-    тому показав найменше використання пам'яті.
+Slotted dataclass зменшує витрати пам'яті завдяки відсутності словника атрибутів екземпляра.
 
-    ## Збереження індексу
+Масив array('I') зберігає цілі числа компактніше, тому показав найменше використання пам'яті.
 
-    Реалізовано підтримку двох форматів: Pickle та JSON.
+## Збереження індексу
 
-    Pickle не можна використовувати для завантаження
-    файлів із недовірених джерел, оскільки десеріалізація
-    може призвести до виконання довільного коду.
+Реалізовано підтримку двох форматів: Pickle та JSON.
 
-    ## Висновок
+Pickle не можна використовувати для завантаження файлів із недовірених джерел, оскільки десеріалізація може призвести до виконання довільного коду.
 
-    Реалізовано інвертований індекс, логічний пошук,
-    збереження даних та порівняння структур даних
-    за використанням пам'яті й продуктивністю.
+## Висновок
 
-
-    ## Lab 03 — The Object Model and Ranking
-
-    ### M1 — Object Model
-
-    - Index supports len(), iteration, membership and item access.
-    - Document statistics and cached average document length.
-    - Context manager open_index().
-
-    ### M2 — Ranking
-
-    - TF-IDF and BM25 scoring.
-    - Scorer protocol.
-    - SearchResult dataclass.
-    - Top-k selection using heapq.nlargest.
-
-    #### Sanity checks
-
-    | Check | Result | Status |
-    |---|---|---|
-    | Rare vs common term | 5.703782 > 0.006689 | PASS |
-    | BM25 saturation | 0.002587 > 0.000023 | PASS |
-    | Short vs long document | 0.014676 > 0.008280 | PASS |
-
-    ### M3 — Query Parser
-
-    - Recursive descent parser.
-    - AND, OR, NOT operators.
-    - Implicit AND and parentheses.
-    - Exact phrase search.
-    - Positional inverted index.
-    - Pickle and JSON serialization.
-
-    ### M4 — Performance and Evaluation
-
-    - timed decorator for build_index, load and search.
-    - LRU cache with maxsize=256.
-    - Highlighted text snippets with 80-character context.
-
-    #### Cache benchmark
-
-    | Request | Time (ms) | Cache |
-    |---|---:|---|
-    | First | 0.428 | MISS |
-    | Repeated | 0.050 | HIT |
-
-    Cache hits do not guarantee faster overall ranking.
-
-    #### Precision@5
-
-    | Query | TF-IDF | BM25 |
-    |---|---:|---:|
-    | programming language | 0.00 | 0.00 |
-    | dictionaries AND sets | 0.20 | 0.20 |
-    | "inverted index" | 0.40 | 0.40 |
-    | "hash tables" | 0.20 | 0.20 |
-    | keys AND values | 0.20 | 0.20 |
-    | "boolean queries" | 0.20 | 0.20 |
-    | "data structures" | 0.00 | 0.00 |
-    | "memory optimization" | 0.00 | 0.00 |
-    | "text documents" | 0.20 | 0.20 |
-    | "search engines" | 0.00 | 0.00 |
-    | Mean Precision@5 | 0.14 | 0.14 |
-
-    Both algorithms achieved the same measured precision.
-    Evaluation uses 10 manually labelled queries.
-    Relevance labels cover only the five original documents.
-
-    ### Corpus statistics
-
-    - Documents: 300
-    - Unique terms: 34
-    - Average document length: 196.83
-
-    ### Usage
-
-    Build positional index:
-
-        python -m findex.index data --out index.bin --positions
-
-    Ranked search:
-
-        python -m findex.ranking "(python OR search) AND index" --k 5
-
-    Cache demonstration:
-
-        python -m findex.ranking "python AND search" --k 3 --repeat 2
-
-    Sanity checks:
-
-        python sanity_checks.py
-
-    Evaluation:
-
-        python evaluation.py
-
-### Висновок
-
- У ході лабораторної роботи реалізовано ранжування документів за алгоритмами TF-IDF та BM25, логічні запити, пошук точних фраз, кешування та формування текстових фрагментів. проведено оцінювання точності пошуку за метрикою Precision@5. бидва алгоритми показали результат 0.14 на використаній розмітці корпусу.
-
+Реалізовано інвертований індекс, логічний пошук, збереження даних та порівняння структур даних за використанням пам'яті й продуктивністю.
 
 ---
 
-## Laboratory work 4
+# Лабораторна робота №3 — Об'єктна модель та ранжування
 
-### CI status
+## M1 — Об'єктна модель
+
+- Клас Index підтримує len(), ітерацію, перевірку належності та доступ за ключем.
+- Реалізовано статистику документів і кешування середньої довжини документа.
+- Створено контекстний менеджер open_index().
+
+## M2 — Ранжування
+
+- Реалізовано алгоритми TF-IDF та BM25.
+- Створено протокол Scorer.
+- Реалізовано клас даних SearchResult.
+- Для вибору найкращих результатів використано heapq.nlargest.
+
+### Перевірка коректності
+
+| Перевірка | Результат | Статус |
+|---|---|---|
+| Рідкісний та поширений терміни | 5.703782 > 0.006689 | PASS |
+| Насичення BM25 | 0.002587 > 0.000023 | PASS |
+| Короткий та довгий документи | 0.014676 > 0.008280 | PASS |
+
+## M3 — Парсер запитів
+
+- Реалізовано парсер методом рекурсивного спуску.
+- Підтримуються оператори AND, OR, NOT.
+- Реалізовано неявний AND та підтримку дужок.
+- Додано пошук точних фраз.
+- Побудовано позиційний інвертований індекс.
+- Реалізовано серіалізацію у форматах Pickle та JSON.
+
+## M4 — Продуктивність та оцінювання
+
+- Декоратор timed використано для функцій build_index, load та search.
+- Реалізовано LRU-кеш із maxsize=256.
+- Реалізовано формування текстових фрагментів із підсвічуванням та контекстом у 80 символів.
+
+### Перевірка роботи кешу
+
+| Запит | Час, мс | Стан кешу |
+|---|---:|---|
+| Перший | 0.428 | MISS |
+| Повторний | 0.050 | HIT |
+
+Використання кешованих результатів не завжди гарантує прискорення загального процесу ранжування.
+
+### Оцінювання за метрикою Precision@5
+
+| Запит | TF-IDF | BM25 |
+|---|---:|---:|
+| programming language | 0.00 | 0.00 |
+| dictionaries AND sets | 0.20 | 0.20 |
+| "inverted index" | 0.40 | 0.40 |
+| "hash tables" | 0.20 | 0.20 |
+| keys AND values | 0.20 | 0.20 |
+| "boolean queries" | 0.20 | 0.20 |
+| "data structures" | 0.00 | 0.00 |
+| "memory optimization" | 0.00 | 0.00 |
+| "text documents" | 0.20 | 0.20 |
+| "search engines" | 0.00 | 0.00 |
+| Середнє Precision@5 | 0.14 | 0.14 |
+
+Обидва алгоритми показали однакову точність пошуку.
+
+Оцінювання проведено за 10 запитами з ручною розміткою. Розмітка релевантності охоплює лише п'ять початкових документів.
+
+## Статистика корпусу
+
+- Кількість документів: 300.
+- Кількість унікальних термінів: 34.
+- Середня довжина документа: 196.83.
+
+## Запуск програми
+
+Побудова позиційного індексу:
+
+    python -m findex.index data --out index.bin --positions
+
+Ранжований пошук:
+
+    python -m findex.ranking "(python OR search) AND index" --k 5
+
+Перевірка роботи кешу:
+
+    python -m findex.ranking "python AND search" --k 3 --repeat 2
+
+Перевірка коректності алгоритмів:
+
+    python sanity_checks.py
+
+Оцінювання точності пошуку:
+
+    python evaluation.py
+
+## Висновок
+
+У ході лабораторної роботи реалізовано ранжування документів за алгоритмами TF-IDF та BM25, логічні запити, пошук точних фраз, кешування та формування текстових фрагментів. Проведено оцінювання точності пошуку за метрикою Precision@5. Обидва алгоритми показали результат 0.14 на використаній розмітці корпусу.
+
+---
+
+# Лабораторна робота №4 — Типізація, тестування, пакування та CLI
+
+## Стан автоматизованих перевірок
 
 [![CI](https://github.com/8489279-web/Lab2/actions/workflows/ci.yml/badge.svg)](https://github.com/8489279-web/Lab2/actions/workflows/ci.yml)
 
-### Installation
+## Встановлення
 
     uv sync
     uv tool install .
 
-### CLI commands
+## Команди командного інтерфейсу
+
+Перегляд доступних команд:
 
     findex --help
+
+Побудова індексу:
+
     findex index data --out index.bin
+
+Пошук за алгоритмом BM25:
+
     findex search "python" --scorer bm25 --k 5
+
+Пошук за алгоритмом TF-IDF:
+
     findex search "python" --scorer tfidf --k 5
+
+Виведення результатів у форматі JSON:
+
     findex search "python" --json
+
+Перегляд статистики індексу:
+
     findex stats
+
+Пошук із додатковим логуванням:
+
     findex -v search "python"
     findex -vv search "python"
 
-### Code quality
+## Перевірка якості коду
 
     uv run ruff check .
     uv run pyright
     uv run pytest -q
 
-Results:
+Результати локальних перевірок:
 
-- Ruff: all checks passed.
-- Pyright: 0 errors, 0 warnings.
+- Ruff: All checks passed!
+- Pyright: 0 errors, 0 warnings, 0 informations.
 - Pytest: 118 passed.
-- Hypothesis: 3 property-based tests.
-- Code coverage: 68%.
+- Hypothesis: реалізовано 3 тести на основі властивостей.
+- Покриття коду: 68%.
 
-### Test coverage
+## Покриття коду тестами
 
     uv run pytest --cov=findex --cov-report=term-missing
 
-| Module | Coverage |
+| Модуль | Покриття |
 |---|---:|
 | benchmark.py | 0% |
 | cache.py | 44% |
@@ -230,25 +243,31 @@ Results:
 | snippets.py | 0% |
 | store.py | 74% |
 | utils.py | 100% |
-| Total | 68% |
+| Загальне покриття | 68% |
 
-Benchmark scripts and legacy demonstration entry points
-were not specifically targeted by automated tests.
-Snippet generation remains untested.
-Some cache and ranking branches also remain uncovered.
+Основну увагу приділено тестуванню індексації, пошуку, парсера запитів, алгоритмів ранжування, збереження індексу та командного інтерфейсу.
 
-### Slow tests
+Скрипти вимірювання продуктивності та демонстраційні точки входу не були основною ціллю автоматизованого тестування. Формування текстових фрагментів залишилося непокритим тестами. Деякі гілки кешування та ранжування також не покрито.
+
+## Розподіл тестів за тривалістю
+
+Запуск швидких тестів:
 
     uv run pytest -m "not slow" -q
+
+Запуск повільних тестів:
+
     uv run pytest -m slow -q
 
-- Fast tests: 116.
-- Slow tests: 2.
+- Кількість швидких тестів: 116.
+- Кількість повільних тестів: 2.
 
-### Conclusion
+## Автоматизація перевірок
 
-The Findex project was extended with strict type checking,
-automated testing, property-based testing, package metadata,
-a command-line interface, structured logging and CI configuration.
-All 118 automated tests passed, and code coverage reached 68%.
+Для автоматизованої перевірки проєкту налаштовано GitHub Actions.
 
+Під час завантаження змін або створення pull request передбачено встановлення залежностей та запуск Ruff, Pyright і Pytest.
+
+## Висновок
+
+У ході лабораторної роботи реалізовано строгу типізацію, автоматизоване тестування, пакування проєкту, командний інтерфейс та логування. Налаштовано автоматизовану перевірку коду за допомогою GitHub Actions. У локальному середовищі успішно пройдено 118 тестів, покриття коду становило 68%.
