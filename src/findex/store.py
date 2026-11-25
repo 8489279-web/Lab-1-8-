@@ -1,4 +1,3 @@
-﻿
 import json
 import pickle
 from collections.abc import Generator
@@ -40,8 +39,7 @@ def save(index: Index, path: str | Path) -> None:
             },
             "doc_lengths": index.doc_lengths,
             "doc_meta": {
-                doc_id: asdict(meta)
-                for doc_id, meta in index.doc_meta.items()
+                doc_id: asdict(meta) for doc_id, meta in index.doc_meta.items()
             },
         }
 
@@ -73,14 +71,8 @@ def load(path: str | Path) -> Index:
                 ]
                 for term, items in data["postings"].items()
             },
-            doc_lengths={
-                int(k): v
-                for k, v in data["doc_lengths"].items()
-            },
-            doc_meta={
-                int(k): DocMeta(**v)
-                for k, v in data["doc_meta"].items()
-            },
+            doc_lengths={int(k): v for k, v in data["doc_lengths"].items()},
+            doc_meta={int(k): DocMeta(**v) for k, v in data["doc_meta"].items()},
         )
 
     # Never load untrusted pickle files.

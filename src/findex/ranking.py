@@ -1,4 +1,3 @@
-﻿
 from collections import defaultdict
 from heapq import nlargest
 
@@ -24,10 +23,7 @@ def positive_terms(
         return positive_terms(node.operand, not negated)
 
     if isinstance(node, (And, Or)):
-        return (
-            positive_terms(node.left, negated)
-            + positive_terms(node.right, negated)
-        )
+        return positive_terms(node.left, negated) + positive_terms(node.right, negated)
 
     return []
 
@@ -61,9 +57,7 @@ def search(
     for term in positive_terms(tree):
         for posting in index.postings.get(term, []):
             if posting.doc_id in candidates:
-                scores[posting.doc_id] += scorer.score(
-                    term, posting, index
-                )
+                scores[posting.doc_id] += scorer.score(term, posting, index)
 
     results = (
         SearchResult(
@@ -98,9 +92,7 @@ def main() -> None:
     parser.add_argument("--repeat", type=int, default=1)
     args = parser.parse_args()
 
-    scorer: Scorer = (
-        BM25() if args.scorer == "bm25" else TfIdf()
-    )
+    scorer: Scorer = BM25() if args.scorer == "bm25" else TfIdf()
 
     with open_index(args.index) as index:
         cache = QueryCache(index)
@@ -110,9 +102,7 @@ def main() -> None:
             print("Query:", args.query)
             print("Scorer:", args.scorer)
 
-            results = search(
-                index, args.query, scorer, args.k, cache
-            )
+            results = search(index, args.query, scorer, args.k, cache)
 
             for rank, result in enumerate(results, 1):
                 print(
@@ -123,9 +113,7 @@ def main() -> None:
 
                 print(
                     "Snippet:",
-                    make_snippet(
-                        index, result.doc_id, args.query
-                    ),
+                    make_snippet(index, result.doc_id, args.query),
                 )
 
         print("\nCache statistics:")

@@ -1,0 +1,21 @@
+                   Async crawler                   
++-------------------------------------------------+
+| Parameter      | Value                          |
+|----------------+--------------------------------|
+| Seed           | http://127.0.0.1:8000          |
+| Pages fetched  | 200/200                        |
+| Pages saved    | 200                            |
+| Concurrency    | 1                              |
+| Per-host limit | 5                              |
+| In-flight      | 0                              |
+| Errors         | 0                              |
+| Queue depth    | 0                              |
+| Elapsed        | 47.03 s                        |
+| Pages/s        | 4.25                           |
+| Output         | benchmarks\lab6\crawl_c1.jsonl |
++-------------------------------------------------+Pages fetched: 200
+Wall time: 47.048 s
+Pages/s: 4.251
+Errors: 0
+Saved to: benchmarks\lab6\crawl_c1.jsonl
+Log: crawl.log

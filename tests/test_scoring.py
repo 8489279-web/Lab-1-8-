@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 
 from findex.index import DocMeta, Index, Posting
 from findex.ranking import search
@@ -17,9 +17,7 @@ def test_rare_term_score(tiny_index: Index, scorer) -> None:
 
 @pytest.mark.parametrize("scorer", [TfIdf(), BM25()])
 def test_unknown_term(tiny_index: Index, scorer) -> None:
-    assert scorer.score(
-        "unknownword", Posting(1, 1), tiny_index
-    ) == 0.0
+    assert scorer.score("unknownword", Posting(1, 1), tiny_index) == 0.0
 
 
 @pytest.mark.parametrize("scorer", [TfIdf(), BM25()])
@@ -43,9 +41,7 @@ def test_bm25_saturation(tiny_index: Index) -> None:
 
 def test_bm25_document_length() -> None:
     index = Index(
-        postings={
-            "python": [Posting(1, 1), Posting(2, 1)]
-        },
+        postings={"python": [Posting(1, 1), Posting(2, 1)]},
         doc_lengths={1: 10, 2: 100},
         doc_meta={
             1: DocMeta("short.txt", "short"),

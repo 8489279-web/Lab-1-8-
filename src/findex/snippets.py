@@ -13,26 +13,22 @@ def make_snippet(index: Index, doc_id: int, query: str, radius: int = 80) -> str
     terms = positive_terms(parse(query))
 
     if not terms:
-        return text[:radius * 2]
+        return text[: radius * 2]
 
     pattern = re.compile(
-        r"\b(?:" + "|".join(
-            re.escape(term) for term in terms
-        ) + r")\b",
-        re.IGNORECASE
+        r"\b(?:" + "|".join(re.escape(term) for term in terms) + r")\b", re.IGNORECASE
     )
 
     matches = list(pattern.finditer(text))
 
     if not matches:
-        return text[:radius * 2]
+        return text[: radius * 2]
 
     best = max(
         matches,
         key=lambda m: sum(
-            abs(other.start() - m.start()) <= radius
-            for other in matches
-        )
+            abs(other.start() - m.start()) <= radius for other in matches
+        ),
     )
 
     start = max(0, best.start() - radius)
@@ -40,10 +36,7 @@ def make_snippet(index: Index, doc_id: int, query: str, radius: int = 80) -> str
 
     snippet = text[start:end]
 
-    snippet = pattern.sub(
-        lambda m: "[" + m.group() + "]",
-        snippet
-    )
+    snippet = pattern.sub(lambda m: "[" + m.group() + "]", snippet)
 
     if start > 0:
         snippet = "..." + snippet

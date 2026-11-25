@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 
 from findex.index import Index
 from findex.query import And, Not, Or, Phrase, Query, Term, parse

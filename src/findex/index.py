@@ -9,7 +9,7 @@ from pathlib import Path
 from time import perf_counter, process_time
 from typing import Literal
 
-from findex.corpus import tokenize
+from findex.corpus import corpus_paths, iter_documents, tokenize
 from findex.utils import timed
 
 ExecutorName = Literal["serial", "threads", "processes"]
@@ -73,6 +73,14 @@ class Index:
         return len(self.postings.get(term, []))
 
 
+def count_documents(path: Path) -> int:
+    if path.suffix.lower() == ".txt":
+        return 1
+
+    with path.open(encoding="utf-8-sig") as file:
+        return sum(1 for line in file if line.strip())
+
+
 def build_partial(
     paths: list[Path],
     start_id: int = 1,
@@ -82,9 +90,13 @@ def build_partial(
     doc_lengths: dict[int, int] = {}
     doc_meta: dict[int, DocMeta] = {}
 
-    for doc_id, path in enumerate(paths, start=start_id):
-        text = path.read_text(encoding="utf-8-sig")
-        tokens = tokenize(text)
+    documents = (document for path in paths for document in iter_documents(path))
+
+    for doc_id, document in enumerate(
+        documents,
+        start=start_id,
+    ):
+        tokens = tokenize(document.text)
         counts = Counter(tokens)
 
         positions: dict[str, list[int]] = defaultdict(list)
@@ -96,8 +108,8 @@ def build_partial(
         doc_lengths[doc_id] = len(tokens)
 
         doc_meta[doc_id] = DocMeta(
-            str(path),
-            path.stem,
+            document.path,
+            document.title,
         )
 
         for term, tf in counts.items():
@@ -170,7 +182,7 @@ def build_index(
         metrics.merge_seconds = 0.0
         metrics.worker_cpu_seconds = 0.0
 
-    paths = sorted(Path(directory).rglob("*.txt"))
+    paths = corpus_paths(directory)
 
     if not paths:
         return Index({}, {}, {})
@@ -184,9 +196,16 @@ def build_index(
         workers = min(workers, len(paths))
         chunk_size = (len(paths) + workers - 1) // workers
 
-        chunks = [
-            (paths[i : i + chunk_size], i + 1) for i in range(0, len(paths), chunk_size)
-        ]
+        chunks: list[tuple[list[Path], int]] = []
+
+        next_id = 1
+
+        for i in range(0, len(paths), chunk_size):
+            chunk = paths[i : i + chunk_size]
+
+            chunks.append((chunk, next_id))
+
+            next_id += sum(count_documents(path) for path in chunk)
 
         try:
             if executor == "threads":
@@ -248,6 +267,7 @@ def main() -> None:
     import argparse
     import tracemalloc
 
+    from findex.index import build_index
     from findex.store import save
 
     parser = argparse.ArgumentParser()

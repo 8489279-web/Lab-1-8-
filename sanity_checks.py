@@ -1,4 +1,3 @@
-
 from findex.index import Posting
 from findex.scoring import BM25, TfIdf
 from findex.store import load
@@ -40,13 +39,9 @@ print("PASS:", 0 < s20 - s19 < s2 - s1)
 short_id = min(index.doc_lengths, key=index.doc_length)
 long_id = max(index.doc_lengths, key=index.doc_length)
 
-short_score = bm25.score(
-    term, Posting(short_id, 1), index
-)
+short_score = bm25.score(term, Posting(short_id, 1), index)
 
-long_score = bm25.score(
-    term, Posting(long_id, 1), index
-)
+long_score = bm25.score(term, Posting(long_id, 1), index)
 
 print("\nCHECK 3: Document length")
 print(f"Short document: {index.doc_length(short_id)} words")

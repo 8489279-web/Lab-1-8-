@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import re
@@ -27,10 +26,7 @@ class Term(Query):
     value: str
 
     def evaluate(self, index: Index) -> set[int]:
-        return {
-            p.doc_id
-            for p in index.postings.get(self.value, [])
-        }
+        return {p.doc_id for p in index.postings.get(self.value, [])}
 
 
 @dataclass(frozen=True)
@@ -44,10 +40,7 @@ class Phrase(Query):
             return set()
 
         postings = [
-            {
-                p.doc_id: p.positions
-                for p in index.postings.get(word, [])
-            }
+            {p.doc_id: p.positions for p in index.postings.get(word, [])}
             for word in words
         ]
 
@@ -59,16 +52,10 @@ class Phrase(Query):
         results: set[int] = set()
 
         for doc_id in candidates:
-            positions = [
-                set(items[doc_id])
-                for items in postings
-            ]
+            positions = [set(items[doc_id]) for items in postings]
 
             for start in positions[0]:
-                if all(
-                    start + i in positions[i]
-                    for i in range(len(words))
-                ):
+                if all(start + i in positions[i] for i in range(len(words))):
                     results.add(doc_id)
                     break
 
@@ -81,10 +68,7 @@ class And(Query):
     right: Query
 
     def evaluate(self, index: Index) -> set[int]:
-        return (
-            self.left.evaluate(index)
-            & self.right.evaluate(index)
-        )
+        return self.left.evaluate(index) & self.right.evaluate(index)
 
 
 @dataclass(frozen=True)
@@ -93,10 +77,7 @@ class Or(Query):
     right: Query
 
     def evaluate(self, index: Index) -> set[int]:
-        return (
-            self.left.evaluate(index)
-            | self.right.evaluate(index)
-        )
+        return self.left.evaluate(index) | self.right.evaluate(index)
 
 
 @dataclass(frozen=True)
@@ -104,10 +85,7 @@ class Not(Query):
     operand: Query
 
     def evaluate(self, index: Index) -> set[int]:
-        return (
-            set(index.doc_meta)
-            - self.operand.evaluate(index)
-        )
+        return set(index.doc_meta) - self.operand.evaluate(index)
 
 
 class Parser:

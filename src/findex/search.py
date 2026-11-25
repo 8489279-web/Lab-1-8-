@@ -1,4 +1,3 @@
-
 import argparse
 import tracemalloc
 from time import perf_counter
@@ -69,10 +68,7 @@ def merge_not(a: list[int], b: list[int]) -> list[int]:
 
 
 def get_docs(index: Index, term: str) -> list[int]:
-    return [
-        p.doc_id
-        for p in index.postings.get(term.lower(), [])
-    ]
+    return [p.doc_id for p in index.postings.get(term.lower(), [])]
 
 
 def search(
@@ -87,23 +83,17 @@ def search(
 
     all_docs = sorted(index.doc_meta)
 
-    def intersection(
-        a: list[int], b: list[int]
-    ) -> list[int]:
+    def intersection(a: list[int], b: list[int]) -> list[int]:
         if engine == "set":
             return sorted(set(a) & set(b))
         return merge_and(a, b)
 
-    def union(
-        a: list[int], b: list[int]
-    ) -> list[int]:
+    def union(a: list[int], b: list[int]) -> list[int]:
         if engine == "set":
             return sorted(set(a) | set(b))
         return merge_or(a, b)
 
-    def difference(
-        a: list[int], b: list[int]
-    ) -> list[int]:
+    def difference(a: list[int], b: list[int]) -> list[int]:
         if engine == "set":
             return sorted(set(a) - set(b))
         return merge_not(a, b)
@@ -158,9 +148,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    engine: EngineName = (
-        "set" if args.engine == "set" else "merge"
-    )
+    engine: EngineName = "set" if args.engine == "set" else "merge"
 
     index = load(args.index)
 

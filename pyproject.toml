@@ -8,6 +8,7 @@ requires-python = ">=3.12"
 dependencies = [
     "typer",
     "rich",
+    "httpx>=0.28.1",
 ]
 
 [project.scripts]
@@ -22,6 +23,7 @@ dev = [
     "ruff",
     "psutil>=7.2.2",
     "matplotlib>=3.11.2",
+    "pytest-asyncio>=1.5.0",
 ]
 
 [build-system]
@@ -45,3 +47,4 @@ testpaths = ["tests"]
 markers = [
     "slow: tests that take more than one second",
 ]
+asyncio_default_fixture_loop_scope = "function"

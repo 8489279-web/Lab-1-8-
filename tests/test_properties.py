@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
@@ -11,9 +11,7 @@ from findex.store import load, save
 
 documents = st.lists(
     st.lists(
-        st.sampled_from(
-            ["python", "search", "index", "data", "engine"]
-        ),
+        st.sampled_from(["python", "search", "index", "data", "engine"]),
         min_size=0,
         max_size=30,
     ),

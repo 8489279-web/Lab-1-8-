@@ -1,4 +1,4 @@
-﻿import pytest
+import pytest
 
 from findex.index import Index
 from findex.search import (
@@ -60,9 +60,7 @@ def test_boolean_search(
 def test_engines_equivalent(tiny_index: Index) -> None:
     query = "python OR search"
 
-    assert search(tiny_index, query, "merge") == search(
-        tiny_index, query, "set"
-    )
+    assert search(tiny_index, query, "merge") == search(tiny_index, query, "set")
 
 
 def test_invalid_query(tiny_index: Index) -> None:

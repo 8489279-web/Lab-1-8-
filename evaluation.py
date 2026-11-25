@@ -1,4 +1,3 @@
-
 from findex.ranking import search
 from findex.scoring import BM25, TfIdf
 from findex.store import open_index
@@ -13,7 +12,7 @@ queries = [
     ('"data structures"', {"doc5"}),
     ('"memory optimization"', {"doc5"}),
     ('"text documents"', {"doc2"}),
-    ('"search engines"', {"doc2", "doc4"})
+    ('"search engines"', {"doc2", "doc4"}),
 ]
 
 
@@ -30,39 +29,21 @@ with open_index("index.bin") as index:
     print("-" * 52)
 
     for query, relevant in queries:
-        tfidf_results = search(
-            index, query, TfIdf(), k=5
-        )
+        tfidf_results = search(index, query, TfIdf(), k=5)
 
-        bm25_results = search(
-            index, query, BM25(), k=5
-        )
+        bm25_results = search(index, query, BM25(), k=5)
 
-        p_tfidf = precision_at_5(
-            tfidf_results, relevant
-        )
+        p_tfidf = precision_at_5(tfidf_results, relevant)
 
-        p_bm25 = precision_at_5(
-            bm25_results, relevant
-        )
+        p_bm25 = precision_at_5(bm25_results, relevant)
 
         tfidf_scores.append(p_tfidf)
         bm25_scores.append(p_bm25)
 
-        print(
-            f"{query:30} "
-            f"{p_tfidf:10.2f} "
-            f"{p_bm25:10.2f}"
-        )
+        print(f"{query:30} {p_tfidf:10.2f} {p_bm25:10.2f}")
 
     print("-" * 52)
 
-    print(
-        "Mean Precision@5 TF-IDF:",
-        round(sum(tfidf_scores) / len(queries), 4)
-    )
+    print("Mean Precision@5 TF-IDF:", round(sum(tfidf_scores) / len(queries), 4))
 
-    print(
-        "Mean Precision@5 BM25:",
-        round(sum(bm25_scores) / len(queries), 4)
-    )
+    print("Mean Precision@5 BM25:", round(sum(bm25_scores) / len(queries), 4))

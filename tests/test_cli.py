@@ -1,4 +1,4 @@
-﻿import json
+import json
 from pathlib import Path
 
 import pytest
@@ -56,10 +56,14 @@ def test_search_json(index_file: Path, scorer: str) -> None:
     result = runner.invoke(
         app,
         [
-            "search", "python",
-            "--index", str(index_file),
-            "--scorer", scorer,
-            "--k", "2",
+            "search",
+            "python",
+            "--index",
+            str(index_file),
+            "--scorer",
+            scorer,
+            "--k",
+            "2",
             "--json",
         ],
     )
@@ -89,8 +93,10 @@ def test_missing_index(tmp_path: Path) -> None:
     result = runner.invoke(
         app,
         [
-            "search", "python",
-            "--index", str(tmp_path / "missing.bin"),
+            "search",
+            "python",
+            "--index",
+            str(tmp_path / "missing.bin"),
         ],
     )
 
@@ -126,8 +132,10 @@ def test_logging(index_file: Path, verbosity: str) -> None:
         app,
         [
             verbosity,
-            "search", "python",
-            "--index", str(index_file),
+            "search",
+            "python",
+            "--index",
+            str(index_file),
             "--json",
         ],
     )
@@ -142,8 +150,10 @@ def test_no_results(index_file: Path) -> None:
     result = runner.invoke(
         app,
         [
-            "search", "unknownword",
-            "--index", str(index_file),
+            "search",
+            "unknownword",
+            "--index",
+            str(index_file),
             "--json",
         ],
     )

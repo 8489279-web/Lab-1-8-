@@ -23,24 +23,13 @@ def main() -> None:
     ]
 
     for rows, executor, label in configurations:
-        selected = [
-            row for row in rows
-            if row["executor"] == executor
-        ]
+        selected = [row for row in rows if row["executor"] == executor]
 
-        selected.sort(
-            key=lambda row: int(row["workers"])
-        )
+        selected.sort(key=lambda row: int(row["workers"]))
 
-        workers = [
-            int(row["workers"])
-            for row in selected
-        ]
+        workers = [int(row["workers"]) for row in selected]
 
-        speedup = [
-            float(row["speedup"])
-            for row in selected
-        ]
+        speedup = [float(row["speedup"]) for row in selected]
 
         plt.plot(
             workers,
@@ -50,10 +39,7 @@ def main() -> None:
             label=label,
         )
 
-    workers = sorted({
-        int(row["workers"])
-        for row in gil
-    })
+    workers = sorted({int(row["workers"]) for row in gil})
 
     plt.plot(
         workers,

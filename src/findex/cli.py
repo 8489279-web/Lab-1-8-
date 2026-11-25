@@ -9,6 +9,7 @@ from rich.console import Console
 from rich.progress import Progress
 from rich.table import Table
 
+from findex.crawler.runner import execute_crawl
 from findex.index import ExecutorName, build_index
 from findex.ranking import search as ranked_search
 from findex.scoring import ScorerName, get_scorer
@@ -46,6 +47,44 @@ def main(
     )
 
 
+@app.command("crawl")
+def crawl_command(
+    seed: str,
+    max_pages: Annotated[
+        int,
+        typer.Option("--max-pages", min=1),
+    ] = 500,
+    concurrency: Annotated[
+        int,
+        typer.Option("--concurrency", min=1),
+    ] = 10,
+    per_host: Annotated[
+        int,
+        typer.Option("--per-host", min=1),
+    ] = 2,
+    out: Annotated[
+        Path,
+        typer.Option("--out", "-o"),
+    ] = Path("data/crawl.jsonl"),
+    min_delay: Annotated[
+        float,
+        typer.Option("--min-delay", min=0.0),
+    ] = 0.1,
+) -> None:
+    try:
+        execute_crawl(
+            seed,
+            max_pages=max_pages,
+            concurrency=concurrency,
+            per_host=per_host,
+            out=out,
+            min_delay=min_delay,
+        )
+
+    except (OSError, ValueError, TypeError) as error:
+        fail(str(error))
+
+
 @app.command("index")
 def index_command(
     directory: Path,
@@ -62,8 +101,8 @@ def index_command(
         typer.Option("--executor"),
     ] = "serial",
 ) -> None:
-    if not directory.is_dir():
-        fail(f"Directory not found: {directory}")
+    if not directory.exists():
+        fail(f"Path not found: {directory}")
 
     try:
         with Progress(console=console) as progress:
@@ -89,7 +128,7 @@ def index_command(
         console.print(f"Terms: {len(index)}")
         console.print(f"Index saved: {out}")
 
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, TypeError) as error:
         fail(str(error))
 
 
@@ -154,7 +193,13 @@ def search_command(
         console.print(table)
         console.print(f"Results: {len(results)}")
 
-    except (OSError, ValueError, TypeError, EOFError, pickle.UnpicklingError) as error:
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        EOFError,
+        pickle.UnpicklingError,
+    ) as error:
         fail(str(error))
 
 
@@ -185,7 +230,13 @@ def stats_command(
 
         console.print(table)
 
-    except (OSError, ValueError, TypeError, EOFError, pickle.UnpicklingError) as error:
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        EOFError,
+        pickle.UnpicklingError,
+    ) as error:
         fail(str(error))
 
 

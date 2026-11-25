@@ -1,4 +1,3 @@
-
 import pickle
 import tracemalloc
 from array import array
@@ -35,7 +34,6 @@ def build_variant(
         counts = Counter(tokens)
 
         for term, tf in counts.items():
-
             if variant == "plain":
                 items = postings.setdefault(term, [])
 

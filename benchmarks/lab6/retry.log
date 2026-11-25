@@ -1,0 +1,4 @@
+2026-11-25 21:14:18,707 INFO url=http://127.0.0.1:8000/robots.txt status=200 bytes=32 elapsed=0.212038 attempt=1
+2026-11-25 21:14:18,761 INFO url=http://127.0.0.1:8000/retry status=429 bytes=0 elapsed=0.053912 attempt=1
+2026-11-25 21:14:18,761 WARNING Retry url=http://127.0.0.1:8000/retry status=429 delay=1.016
+2026-11-25 21:14:19,816 INFO url=http://127.0.0.1:8000/retry status=200 bytes=81 elapsed=1.108720 attempt=2

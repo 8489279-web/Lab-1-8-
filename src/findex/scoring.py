@@ -1,4 +1,3 @@
-
 import math
 from dataclasses import dataclass, field
 from typing import Literal, Protocol
@@ -14,8 +13,7 @@ class Scorer(Protocol):
         term: str,
         posting: Posting,
         index: Index,
-    ) -> float:
-        ...
+    ) -> float: ...
 
 
 class TfIdf:
@@ -30,9 +28,7 @@ class TfIdf:
         if df == 0 or index.num_docs == 0:
             return 0.0
 
-        return posting.tf * math.log(
-            index.num_docs / df
-        )
+        return posting.tf * math.log(index.num_docs / df)
 
 
 class BM25:
@@ -64,15 +60,11 @@ class BM25:
         dl = index.doc_length(posting.doc_id)
         tf = posting.tf
 
-        idf = math.log(
-            1 + (n - df + 0.5) / (df + 0.5)
-        )
+        idf = math.log(1 + (n - df + 0.5) / (df + 0.5))
 
         numerator = tf * (self.k1 + 1)
 
-        denominator = tf + self.k1 * (
-            1 - self.b + self.b * dl / avgdl
-        )
+        denominator = tf + self.k1 * (1 - self.b + self.b * dl / avgdl)
 
         return idf * numerator / denominator
 
